@@ -30,6 +30,9 @@ gunicorn = ["gunicorn"]
 requires = ["poetry>=1.0"]
 build-backend = "poetry.masonry.api"
 
+[tool.isort]
+profile = "black"
+
 [[tool.mypy.overrides]]
 module = [
     "flask",
