@@ -36,16 +36,18 @@ def fixed_datetime():
 
 @pytest.fixture
 def saved_situations_json():
-    with open(os.path.join(os.path.dirname(__file__), "data",
-                           "situations.json")) as file:
+    with open(
+        os.path.join(os.path.dirname(__file__), "data", "situations.json")
+    ) as file:
         json_data = json.load(file)
     return json_data
 
 
 @pytest.fixture
 def saved_situations_list():
-    with open(os.path.join(os.path.dirname(__file__), "data",
-                           "situations.pkl"), "rb") as file:
+    with open(
+        os.path.join(os.path.dirname(__file__), "data", "situations.pkl"), "rb"
+    ) as file:
         return pickle.load(file)
 
 

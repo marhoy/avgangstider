@@ -1,4 +1,4 @@
-FROM python:3.8-slim
+FROM python:3.9-slim
 
 # Install poetry in the system python
 RUN pip install --upgrade pip && pip install poetry
