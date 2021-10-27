@@ -21,5 +21,5 @@ def iso_str_to_datetime(timestamp_str: str) -> datetime:
         tzinfo=datetime.timezone(datetime.timedelta(seconds=7200)))
     """
     # If the timezone info is e.g. +0200, change to +02:00
-    timestamp_str = re.sub(r'(\d{2,})(\d{2,})$', r'\1:\2', timestamp_str)
+    timestamp_str = re.sub(r"(\d{2,})(\d{2,})$", r"\1:\2", timestamp_str)
     return datetime.fromisoformat(timestamp_str)

@@ -9,11 +9,12 @@ from avgangstider.utils import iso_str_to_datetime
 LOG = logging.getLogger(__name__)
 
 
-def get_departures(stop_id: str,
-                   line_ids: List[str] = None,
-                   platforms: List[str] = None,
-                   max_departures: int = 10
-                   ) -> List[Departure]:
+def get_departures(
+    stop_id: str,
+    line_ids: List[str] = None,
+    platforms: List[str] = None,
+    max_departures: int = 10,
+) -> List[Departure]:
     """Query the Entur API and return a list of matching departures
 
     Args:
@@ -30,49 +31,52 @@ def get_departures(stop_id: str,
     # Get response from Entur API
     if line_ids:
         query = entur_query.create_departure_query_whitelist(
-            stop_id=stop_id, line_ids=line_ids, max_departures=max_departures)
+            stop_id=stop_id, line_ids=line_ids, max_departures=max_departures
+        )
     else:
         query = entur_query.create_departure_query(
-            stop_id=stop_id, max_departures=max_departures)
+            stop_id=stop_id, max_departures=max_departures
+        )
     json = entur_query.journey_planner_api(query).json()
 
     departures: List[Departure] = []
-    if json['data']['stopPlace'] is None:
+    if json["data"]["stopPlace"] is None:
         # If there is no valid data, return an empty list
         return departures
 
-    for journey in json['data']['stopPlace']['estimatedCalls']:
+    for journey in json["data"]["stopPlace"]["estimatedCalls"]:
 
         # Extract the elements we want from the response
-        line_id = journey['serviceJourney']['line']['id']
-        line_name = journey['serviceJourney']['line']['publicCode']
-        bg_color = journey['serviceJourney']['line']['presentation']['colour']
-        fg_color = journey['serviceJourney']['line']['presentation']['textColour']  # noqa
-        platform = journey['quay']['id']
-        destination = journey['destinationDisplay']['frontText']
-        departure_datetime = iso_str_to_datetime(
-            journey['expectedDepartureTime'])
+        line_id = journey["serviceJourney"]["line"]["id"]
+        line_name = journey["serviceJourney"]["line"]["publicCode"]
+        bg_color = journey["serviceJourney"]["line"]["presentation"]["colour"]
+        fg_color = journey["serviceJourney"]["line"]["presentation"][
+            "textColour"
+        ]  # noqa
+        platform = journey["quay"]["id"]
+        destination = journey["destinationDisplay"]["frontText"]
+        departure_datetime = iso_str_to_datetime(journey["expectedDepartureTime"])
 
         # Skip unwanted platforms
         if platforms and (platform not in platforms):
             continue
 
         # Format departure string and add a departure to the list
-        departure = Departure(line_id=line_id,
-                              line_name=line_name,
-                              destination=destination,
-                              departure_datetime=departure_datetime,
-                              platform=platform,
-                              fg_color=fg_color,
-                              bg_color=bg_color)
+        departure = Departure(
+            line_id=line_id,
+            line_name=line_name,
+            destination=destination,
+            departure_datetime=departure_datetime,
+            platform=platform,
+            fg_color=fg_color,
+            bg_color=bg_color,
+        )
         departures.append(departure)
 
     return departures
 
 
-def get_situations(line_ids: List[str],
-                   language: str = "no"
-                   ) -> List[Situation]:
+def get_situations(line_ids: List[str], language: str = "no") -> List[Situation]:
     """Query the Entur API and return a list of relevant situations
 
     Args:
@@ -89,27 +93,27 @@ def get_situations(line_ids: List[str],
     json = entur_query.journey_planner_api(query).json()
 
     situations: List[Situation] = []
-    if not json.get('data'):
+    if not json.get("data"):
         # If there is no valid data, return an empty list
         return situations
 
-    for line in json['data']['lines']:
+    for line in json["data"]["lines"]:
         if not line:
             # Might be empty if line_id is non-existing
             continue
 
         # Extract some general information about the line
-        line_id = line['id']
-        line_name = line['publicCode']
-        transport_mode = line['transportMode']
-        fg_color = line['presentation']['textColour']
-        bg_color = line['presentation']['colour']
+        line_id = line["id"]
+        line_name = line["publicCode"]
+        transport_mode = line["transportMode"]
+        fg_color = line["presentation"]["textColour"]
+        bg_color = line["presentation"]["colour"]
 
-        for situation in line['situations']:
+        for situation in line["situations"]:
 
             # Extract the fields we need from the response
-            start_time = situation['validityPeriod']['startTime']
-            end_time = situation['validityPeriod']['endTime']
+            start_time = situation["validityPeriod"]["startTime"]
+            end_time = situation["validityPeriod"]["endTime"]
 
             # Find start, end and current timestamp
             start_time = utils.iso_str_to_datetime(start_time)
@@ -118,15 +122,17 @@ def get_situations(line_ids: List[str],
 
             # Add relevant situations to the list
             if start_time < now < end_time:
-                for summary in situation['summary']:
-                    if summary['language'] == language:
-                        situations.append(Situation(
-                            line_id=line_id,
-                            line_name=line_name,
-                            transport_mode=transport_mode,
-                            fg_color=fg_color,
-                            bg_color=bg_color,
-                            summary=summary['value']
-                        ))
+                for summary in situation["summary"]:
+                    if summary["language"] == language:
+                        situations.append(
+                            Situation(
+                                line_id=line_id,
+                                line_name=line_name,
+                                transport_mode=transport_mode,
+                                fg_color=fg_color,
+                                bg_color=bg_color,
+                                summary=summary["value"],
+                            )
+                        )
 
     return sorted(situations)
