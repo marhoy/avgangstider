@@ -14,16 +14,16 @@ Setting up your development environment
 ---------------------------------------
  ::
 
-    # Install Python 3.7 and make a new virtual environment
-    pyenv install 3.7.4
-    pyenv virtualenv 3.7.4 avgangstider
+    # Install Python 3.9 and make a new virtual environment
+    pyenv install 3.9.7
+    pyenv virtualenv 3.9.7 avgangstider
 
     # Clone the repository
     git clone git@github.com:marhoy/flask-entur-avgangstider.git
 
     # Activate the virtual environment for this directory
     cd flask-entur-avgangstider
-    pyenv local avgangstider 3.7.4
+    pyenv local avgangstider 3.9.7
 
     # Install all requirements (also for development)
     poetry install
@@ -66,15 +66,17 @@ is still 100% and that flake8, mypy and isort are all happy::
 
     [...]
     lint run-test: commands[0] | poetry run flake8 src tests
-    lint run-test: commands[1] | poetry run isort --recursive --check-only src tests
+    lint run-test: commands[1] | poetry run isort --check-only src tests
     lint run-test: commands[2] | poetry run mypy src
 
     [...]
     ___________________________________ summary ____________________________________
-      py37: commands succeeded
-      lint: commands succeeded
-      docs: commands succeeded
-      congratulations :)
+    py37: commands succeeded
+    py38: commands succeeded
+    py39: commands succeeded
+    lint: commands succeeded
+    docs: commands succeeded
+    congratulations :)
 
 
 Build new docker image

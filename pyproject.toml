@@ -14,11 +14,13 @@ gunicorn = {version = "^20.0", optional = true}
 pytest = "*"
 pytest-cov = "*"
 pytest-flask = "*"
+black = "*"
 flake8 = "*"
-tox = "*"
 isort = "*"
-sphinx = "*"
 mypy = "*"
+types-requests = "*"
+tox = "*"
+sphinx = "*"
 sphinx-rtd-theme = "*"
 
 [tool.poetry.extras]
@@ -27,3 +29,10 @@ gunicorn = ["gunicorn"]
 [build-system]
 requires = ["poetry>=1.0"]
 build-backend = "poetry.masonry.api"
+
+[[tool.mypy.overrides]]
+module = [
+    "flask",
+    "werkzeug.datastructures"
+]
+ignore_missing_imports = true
