@@ -1,10 +1,10 @@
 FROM python:3.9-slim
 
 # Install poetry in the system python
-RUN pip install --upgrade pip && pip install poetry
+RUN pip install --upgrade pip && pip install poetry==1.1.15
 
 # Run everything from here as a non-privileged user
-ENV USERNAME flask
+ENV USERNAME=flask
 RUN useradd -m $USERNAME
 # If using an alpine image
 # RUN addgroup -S $USERNAME && adduser -S $USERNAME -G $USERNAME
