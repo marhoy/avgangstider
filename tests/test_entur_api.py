@@ -1,9 +1,16 @@
+"""Tests for the entur_api module."""
+
+from collections.abc import Callable
 from unittest import mock
 
 import avgangstider
+from avgangstider import entur_api
+from avgangstider.classes import Situation
+
+from .conftest import FixedDateTime
 
 
-def test_get_departures():
+def test_get_departures() -> None:  # noqa: D103
     # Test with an empty string as stop_id_
     departures = avgangstider.get_departures(stop_id="")
     assert departures == []
@@ -37,7 +44,7 @@ def test_get_departures():
         assert "3  -> Mortensrud" in str(departure)
 
 
-def test_get_situations():
+def test_get_situations() -> None:  # noqa: D103
     # Test without specifying line_ids
     situations = avgangstider.get_situations(line_ids=[])
     assert situations == []
@@ -48,12 +55,15 @@ def test_get_situations():
 
 
 @mock.patch("avgangstider.entur_api.entur_query")
-def test_get_situations_mocked(
-    entur_query, saved_situations_json, saved_situations_list, fixed_datetime
-):
+def test_get_situations_mocked(  # noqa: D103
+    entur_query: Callable[[str, int], str],
+    saved_situations_json: dict[str, list[dict[str, str]]],
+    saved_situations_list: list[Situation],
+    fixed_datetime: type[FixedDateTime],
+) -> None:
     # Fake datetime.now() and the situation-json
-    entur_query.journey_planner_api().json.return_value = saved_situations_json
-    avgangstider.entur_api.datetime = fixed_datetime("2019-09-21T12:00:00+02:00")
+    entur_query.journey_planner_api().json.return_value = saved_situations_json  # type: ignore
+    entur_api.datetime = fixed_datetime("2019-09-21T12:00:00+02:00")  # type: ignore
 
     # Compared returned situations with the saved result
     situations = avgangstider.get_situations(

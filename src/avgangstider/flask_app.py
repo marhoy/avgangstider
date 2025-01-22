@@ -1,33 +1,34 @@
-import logging
+"""Flask app for displaying departures from Entur."""
+
 from dataclasses import dataclass
-from typing import List, Optional
 
 import flask
-from werkzeug.datastructures import ImmutableMultiDict
+import markupsafe
+from loguru import logger
+from werkzeug.datastructures import MultiDict
+from werkzeug.wrappers.response import Response
 
 import avgangstider
-from avgangstider.entur_api import Departure
-
-# Module wide logger
-LOG = logging.getLogger(__name__)
-# LOG.setLevel(logging.DEBUG)
+from avgangstider import Departure
 
 
 @dataclass
 class AppArguments:
-    """A container to hold request arguments"""
+    """A container to hold request arguments."""
 
-    stop_id: Optional[str]
-    line_ids: List[str]
-    platforms: List[str]
+    stop_id: str | None
+    line_ids: list[str]
+    platforms: list[str]
     max_queries: int
     max_departure_rows: int
 
 
-def parse_args(args: ImmutableMultiDict) -> AppArguments:
-    """Parse the arguments received in the flask requests
+def parse_args(args: MultiDict[str, str]) -> AppArguments:
+    """Parse the arguments received in the flask requests.
+
     Args:
-        An ImmutableMultiDict with the flask.request.args
+        args: An MultiDict[str, str] with the flask.request.args
+
     Returns:
          An AppData object with the corresponding data
     """
@@ -39,8 +40,8 @@ def parse_args(args: ImmutableMultiDict) -> AppArguments:
     max_departure_rows = args.get("max_rows", type=int, default=10)
 
     # Get rid of possible duplicates in lists
-    line_ids = sorted(list(set(line_ids)))
-    platforms = sorted(list(set(platforms)))
+    line_ids = sorted(set(line_ids))
+    platforms = sorted(set(platforms))
 
     app_data = AppArguments(
         stop_id=stop_id,
@@ -49,16 +50,15 @@ def parse_args(args: ImmutableMultiDict) -> AppArguments:
         max_queries=max_queries,
         max_departure_rows=max_departure_rows,
     )
-    LOG.debug(
-        "Created new AppData object, stop_id: {}, lines: {}".format(stop_id, line_ids)
-    )
+    logger.debug(f"Created new AppData object, stop_id: {stop_id}, lines: {line_ids}")
     return app_data
 
 
-def get_departures(app_data: AppArguments) -> List[Departure]:
-    """Get a list of relevant departures from Entur
+def get_departures(app_data: AppArguments) -> list[Departure]:
+    """Get a list of relevant departures from Entur.
+
     Args:
-        An AppData object with the requested arguments
+        app_data: An AppData object with the requested arguments
 
     Returns:
         A list of Departures received from Entur
@@ -75,17 +75,18 @@ def get_departures(app_data: AppArguments) -> List[Departure]:
     )
     # Don't return more than max_departure entries
     departures = departures[: app_data.max_departure_rows]
-    LOG.debug("Got new departures for %s", app_data.stop_id)
+    logger.debug("Got new departures for %s", app_data.stop_id)
 
     return departures
 
 
-def create_app():
+def create_app() -> flask.Flask:
+    """Create a Flask app for displaying departures from Entur."""
     app = flask.Flask(__name__)
     app.secret_key = b"\xb1\xf0\xe8\xe0%\x81\xe8\x93\x1b\xa6\xa7$\x0bu\xb9"
 
     @app.route("/")
-    def departures_from_stop_id():
+    def departures_from_stop_id() -> str | Response:
         # Parse received arguments
         stop_id = flask.request.args.get("stop_id", type=str, default=None)
 
@@ -95,7 +96,7 @@ def create_app():
 
         # Get the request query
         request_query = flask.request.query_string.decode()
-        query = flask.Markup(request_query)
+        query = markupsafe.Markup(request_query)
 
         # If the current query is different than the old:
         # Reset the displayed_line_ids
@@ -108,11 +109,11 @@ def create_app():
         return flask.render_template("avgangstider.html", query=query)
 
     @app.route("/help")
-    def help_page():
+    def help_page() -> str:
         return flask.render_template("help.html")
 
     @app.route("/departure_table")
-    def departure_table():
+    def departure_table() -> str:
         # Get latest departures and render template
         app_data = parse_args(flask.request.args)
         departures = get_departures(app_data)
@@ -129,9 +130,9 @@ def create_app():
         current_displayed_ids = flask.session.get("displayed_line_ids", [])
 
         flask.session["displayed_line_ids"] = sorted(
-            list(displayed_line_ids.union(current_displayed_ids))
+            displayed_line_ids.union(current_displayed_ids)
         )
-        LOG.debug(
+        logger.debug(
             "Stored displayed lines: {}".format(flask.session["displayed_line_ids"])
         )
 
@@ -139,11 +140,11 @@ def create_app():
         return flask.render_template("departure_table.html", departures=departures)
 
     @app.route("/deviations")
-    def deviations():
+    def deviations() -> str:
         # Get the currently displayed line_ids from clients cookie
         # We might have to wait until the get_departures has done it's job
-        line_ids = flask.session.get("displayed_line_ids", None)
-        LOG.debug("Situations: Got list from cookie: {}".format(line_ids))
+        line_ids: list[str] = flask.session.get("displayed_line_ids", [])
+        logger.debug(f"Situations: Got list from cookie: {line_ids}")
 
         # Get current situations from Entur
         situations = [
@@ -152,7 +153,7 @@ def create_app():
 
         # If there is nothing to display...
         if not situations:
-            LOG.debug("No situations to display")
+            logger.debug("No situations to display")
             return ""
 
         # Get the last displayed situation index from a client side cookie
@@ -171,5 +172,4 @@ def create_app():
 if __name__ == "__main__":
     # Start a Flask debugging server
     flask_app = create_app()
-    LOG.setLevel(logging.DEBUG)
-    flask_app.run(host="0.0.0.0", port=5000, debug=True)
+    flask_app.run(port=5000, debug=True)

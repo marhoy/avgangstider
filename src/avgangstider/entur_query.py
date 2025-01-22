@@ -1,4 +1,4 @@
-from typing import List
+"""Query the Entur Journey Planner API for departures and situations."""
 
 import requests
 
@@ -7,7 +7,7 @@ import requests
 
 
 def create_departure_query(stop_id: str, max_departures: int = 10) -> str:
-    """Create a GraphQL query, finding departures for a specific stop_id
+    """Create a GraphQL query, finding departures for a specific stop_id.
 
     Args:
         stop_id: The stop_id you want departures for
@@ -16,7 +16,7 @@ def create_departure_query(stop_id: str, max_departures: int = 10) -> str:
     Returns:
         A GraphQL query string
     """
-    departure_query = """
+    return """
     {
       stopPlace(id: "STOP_PLACE" ) {
         name
@@ -45,19 +45,15 @@ def create_departure_query(stop_id: str, max_departures: int = 10) -> str:
         }
       }
     }
-    """.replace(
-        "STOP_PLACE", stop_id
-    ).replace(
-        "MAX_DEPARTURES", str(max_departures)
-    )
-    return departure_query
+    """.replace("STOP_PLACE", stop_id).replace("MAX_DEPARTURES", str(max_departures))
 
 
 def create_departure_query_whitelist(
-    stop_id: str, line_ids: List[str], max_departures: int = 10
+    stop_id: str, line_ids: list[str], max_departures: int = 10
 ) -> str:
-    """Create a GraphQL query, finding departures for a specific stop_id
-    and for specific line_ids.
+    """Create a GraphQL query.
+
+    Finding departures for a specific stop_id, and for specific line_ids.
 
     Args:
         stop_id: The stop_id you want departures for
@@ -67,7 +63,7 @@ def create_departure_query_whitelist(
     Returns:
         A GraphQL query string
     """
-    departure_query = (
+    return (
         """
     {
       stopPlace(id: "STOP_PLACE") {
@@ -100,17 +96,14 @@ def create_departure_query_whitelist(
         }
       }
     }
-    """.replace(
-            "STOP_PLACE", stop_id
-        )
+    """.replace("STOP_PLACE", stop_id)
         .replace("MAX_DEPARTURES", str(max_departures))
         .replace("LIST_OF_LINE_IDS", str(line_ids).replace("'", '"'))
     )
-    return departure_query
 
 
-def create_situation_query(line_ids: List[str]) -> str:
-    """Create a GraphQL query, finding situations for a list of line_ids
+def create_situation_query(line_ids: list[str]) -> str:
+    """Create a GraphQL query, finding situations for a list of line_ids.
 
     Args:
         line_ids: A list of line_ids you want situations for
@@ -118,7 +111,7 @@ def create_situation_query(line_ids: List[str]) -> str:
     Returns:
         A GraphQL query string
     """
-    situation_query = """
+    return """
     {
       lines(ids: LIST_OF_LINE_IDS) {
         id
@@ -148,14 +141,11 @@ def create_situation_query(line_ids: List[str]) -> str:
         }
       }
     }
-    """.replace(
-        "LIST_OF_LINE_IDS", str(line_ids).replace("'", '"')
-    )
-    return situation_query
+    """.replace("LIST_OF_LINE_IDS", str(line_ids).replace("'", '"'))
 
 
 def journey_planner_api(query: str) -> requests.Response:
-    """Query the Entur Journey Planner API
+    """Query the Entur Journey Planner API.
 
     Args:
         query: A string with the GraphQL query
@@ -165,9 +155,12 @@ def journey_planner_api(query: str) -> requests.Response:
     """
     import socket
 
-    client_name = "flask-entur-avgangstider-{}".format(socket.gethostname())
+    client_name = f"flask-entur-avgangstider-{socket.gethostname()}"
     query_url = r"https://api.entur.io/journey-planner/v3/graphql"
     headers = {"ET-Client-Name": client_name}
-    response = requests.post(query_url, headers=headers, json={"query": query})
+    response = requests.post(
+        query_url, headers=headers, json={"query": query}, timeout=5
+    )
     response.raise_for_status()
+
     return response

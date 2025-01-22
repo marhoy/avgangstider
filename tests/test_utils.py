@@ -1,7 +1,9 @@
+"""Tests for the utility functions in the avgangstider.utils module."""
+
 from avgangstider.utils import iso_str_to_datetime
 
 
-def test_iso_str_to_datetime():
+def test_iso_str_to_datetime() -> None:  # noqa: D103
     from datetime import datetime, timedelta, timezone
 
     timestamp = datetime(2019, 1, 2, 3, 4, 5, tzinfo=timezone(timedelta(seconds=7200)))
