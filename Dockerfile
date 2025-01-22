@@ -1,36 +1,42 @@
-FROM python:3.9-slim
+FROM python:3.13-slim-bookworm
 
-# Install poetry in the system python
-RUN pip install --upgrade pip && pip install poetry==1.1.15
+# Define some environment variables
+ENV UV_NO_CACHE=true \
+    UV_FROZEN=true \
+    UV_NO_SYNC=true \
+    UV_COMPILE_BYTECODE=true
 
-# Run everything from here as a non-privileged user
+# Install uv
+COPY --from=ghcr.io/astral-sh/uv:0.5.21 /uv /uvx /bin/
+
+# We want to run things as a non-privileged user
 ENV USERNAME=flask
+ENV PATH="$PATH:/home/$USERNAME/.local/bin:/home/$USERNAME/app/.venv/bin"
+
+# Add user
 RUN useradd -m $USERNAME
 # If using an alpine image
 # RUN addgroup -S $USERNAME && adduser -S $USERNAME -G $USERNAME
 
-# Set a workdir
+# Set up a workdir
 WORKDIR /home/$USERNAME/app
 RUN chown $USERNAME.$USERNAME .
 
-# Run as a non-privileged used
+# Everything below here runs as a non-privileged user
 USER $USERNAME
 
-# Copy the lock file. If it hasn't changed, we won't reinstall packages
-COPY --chown=$USERNAME:$USERNAME poetry.lock pyproject.toml ./
+# Install runtime dependencies (will be cached)
+COPY pyproject.toml uv.lock ./
+RUN uv sync --no-dev --no-install-project
 
-# Install required packages, and the optional gunicorn
-RUN poetry install --no-dev -E gunicorn
+# Copy project files to container
+COPY . .
 
-# Copy necessary files to container
-COPY --chown=$USERNAME:$USERNAME src ./src
-
-# Install this package as well
-RUN poetry install --no-dev
+# Install our own package
+RUN uv sync --no-dev
 
 # Expose port 5000
 EXPOSE 5000
 
 # Run gunicorn
-ENTRYPOINT ["poetry", "run"]
 CMD ["gunicorn", "-c", "src/gunicorn_config.py", "avgangstider.flask_app:create_app()"]
