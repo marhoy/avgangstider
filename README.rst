@@ -1,5 +1,5 @@
 
-.. image:: https://github.com/marhoy/flask-entur-avgangstider/actions/workflows/pythonpackage/badge.svg
+.. image:: https://github.com/marhoy/flask-entur-avgangstider/actions/workflows/pythonpackage.yml/badge.svg
 
 About
 =====
