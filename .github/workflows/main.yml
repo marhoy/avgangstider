@@ -1,9 +1,13 @@
-name: Pytest
-on: [push]
+name: Pytest and pre-commit
+on:
+  pull_request:
+  push:
+    branches:
+      - main
 
 jobs:
-  build:
-    name: CI
+  pytest:
+    name: pytest
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -28,3 +32,15 @@ jobs:
 
       - name: Run tests
         run: uv run pytest
+
+  pre-commit:
+    name: pre-commit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v4
+        with:
+          python-version: 3.13
+      - uses: pre-commit/action@v3.0.1
+      - uses: pre-commit-ci/lite-action@v1.1.0
+        if: always()
