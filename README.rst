@@ -1,5 +1,5 @@
 
-.. image:: https://github.com/marhoy/flask-entur-avgangstider/workflows/All%20tox%20tests/badge.svg?branch=master
+.. image:: https://github.com/marhoy/flask-entur-avgangstider/actions/workflows/main.yml/badge.svg
 
 About
 =====
