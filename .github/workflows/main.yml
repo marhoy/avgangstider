@@ -15,7 +15,7 @@ jobs:
         if: always()
 
   build:
-    name: Pytest with multiple python versions
+    name: pytest
     runs-on: ubuntu-latest
     strategy:
       matrix:
