@@ -1,13 +1,17 @@
-from datetime import datetime, timedelta
+"""Tests for the classes module."""
+
+import datetime
 
 import avgangstider.classes
 
+from .conftest import FixedDateTime
 
-def test_util(fixed_datetime):
+
+def test_util(fixed_datetime: type[FixedDateTime]) -> None:  # noqa: D103
     # Replace datetime in classes with a mocked class
     mocked_now_string = "2019-01-01T12:00:00+01:00"
-    mocked_now = datetime.fromisoformat(mocked_now_string)
-    avgangstider.classes.datetime = fixed_datetime(mocked_now_string)
+    mocked_now = datetime.datetime.fromisoformat(mocked_now_string)
+    avgangstider.classes.datetime = fixed_datetime(mocked_now_string)  # type: ignore
 
     departure = avgangstider.classes.Departure(
         line_id="",
@@ -20,12 +24,12 @@ def test_util(fixed_datetime):
     )
 
     # Check the departure string for different timedelta's
-    departure.departure_datetime = mocked_now + timedelta(seconds=59)
+    departure.departure_datetime = mocked_now + datetime.timedelta(seconds=59)
     assert departure.departure_string == "nå"
 
-    departure.departure_datetime = mocked_now + timedelta(minutes=30)
+    departure.departure_datetime = mocked_now + datetime.timedelta(minutes=30)
     assert departure.departure_string == "30 min"
 
-    departure.departure_datetime = mocked_now + timedelta(minutes=31)
+    departure.departure_datetime = mocked_now + datetime.timedelta(minutes=31)
     time_string = departure.departure_datetime.strftime("%H:%M")
     assert departure.departure_string == time_string

@@ -1,3 +1,5 @@
+"""Tests for the entur_query module."""
+
 from avgangstider.entur_query import (
     create_departure_query,
     create_departure_query_whitelist,
@@ -6,16 +8,16 @@ from avgangstider.entur_query import (
 )
 
 
-def test_create_departure_query():
-    """Get departures for a stop_id"""
+def test_create_departure_query() -> None:
+    """Get departures for a stop_id."""
     query = create_departure_query(stop_id="NSR:StopPlace:58366")
     response = journey_planner_api(query)
     assert response.ok is True
     assert response.json().get("data")
 
 
-def test_create_departure_query_whitelist():
-    """Get departures for a stop_id and only a list of line_ids
+def test_create_departure_query_whitelist() -> None:
+    """Get departures for a stop_id and only a list of line_ids.
 
     Check that all returned departures are from the specified line_ids
     """
@@ -30,8 +32,8 @@ def test_create_departure_query_whitelist():
         assert departure["serviceJourney"]["line"]["id"] in query_lines
 
 
-def test_create_situation_query():
-    """Get situations for some line_ids"""
+def test_create_situation_query() -> None:
+    """Get situations for some line_ids."""
     query = create_situation_query(line_ids=["RUT:Line:1", "RUT:Line:3"])
     response = journey_planner_api(query)
     assert response.ok is True

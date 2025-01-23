@@ -1,21 +1,20 @@
-import logging
+"""Get departures and situations from the Entur API."""
+
 from datetime import datetime
-from typing import List
+
+from loguru import logger
 
 from avgangstider import Departure, Situation, entur_query, utils
 from avgangstider.utils import iso_str_to_datetime
 
-# Module wide logger
-LOG = logging.getLogger(__name__)
-
 
 def get_departures(
     stop_id: str,
-    line_ids: List[str] = None,
-    platforms: List[str] = None,
+    line_ids: list[str] | None = None,
+    platforms: list[str] | None = None,
     max_departures: int = 10,
-) -> List[Departure]:
-    """Query the Entur API and return a list of matching departures
+) -> list[Departure]:
+    """Query the Entur API and return a list of matching departures.
 
     Args:
         stop_id: The stop_id you want departures for
@@ -26,7 +25,8 @@ def get_departures(
     Returns:
         A list of departures
     """
-    assert isinstance(stop_id, str)
+    if not isinstance(stop_id, str):
+        raise ValueError("stop_id must be a string")
 
     # Get response from Entur API
     if line_ids:
@@ -39,20 +39,17 @@ def get_departures(
         )
     json = entur_query.journey_planner_api(query).json()
 
-    departures: List[Departure] = []
+    departures: list[Departure] = []
     if json["data"]["stopPlace"] is None:
         # If there is no valid data, return an empty list
         return departures
 
     for journey in json["data"]["stopPlace"]["estimatedCalls"]:
-
         # Extract the elements we want from the response
         line_id = journey["serviceJourney"]["line"]["id"]
         line_name = journey["serviceJourney"]["line"]["publicCode"]
         bg_color = journey["serviceJourney"]["line"]["presentation"]["colour"]
-        fg_color = journey["serviceJourney"]["line"]["presentation"][
-            "textColour"
-        ]  # noqa
+        fg_color = journey["serviceJourney"]["line"]["presentation"]["textColour"]
         platform = journey["quay"]["id"]
         destination = journey["destinationDisplay"]["frontText"]
         departure_datetime = iso_str_to_datetime(journey["expectedDepartureTime"])
@@ -76,8 +73,8 @@ def get_departures(
     return departures
 
 
-def get_situations(line_ids: List[str], language: str = "no") -> List[Situation]:
-    """Query the Entur API and return a list of relevant situations
+def get_situations(line_ids: list[str], language: str = "no") -> list[Situation]:
+    """Query the Entur API and return a list of relevant situations.
 
     Args:
         line_ids: A list of strings with line_ids
@@ -86,13 +83,12 @@ def get_situations(line_ids: List[str], language: str = "no") -> List[Situation]
     Returns:
         A list of relevant situations for that line
     """
-
-    LOG.debug("Getting situations for lines %s", line_ids)
+    logger.debug(f"Getting situations for lines {line_ids}.")
 
     query = entur_query.create_situation_query(line_ids)
     json = entur_query.journey_planner_api(query).json()
 
-    situations: List[Situation] = []
+    situations: list[Situation] = []
     if not json.get("data"):
         # If there is no valid data, return an empty list
         return situations
@@ -110,7 +106,6 @@ def get_situations(line_ids: List[str], language: str = "no") -> List[Situation]
         bg_color = line["presentation"]["colour"]
 
         for situation in line["situations"]:
-
             # Extract the fields we need from the response
             start_time = situation["validityPeriod"]["startTime"]
             end_time = situation["validityPeriod"]["endTime"]
