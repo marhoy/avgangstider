@@ -88,13 +88,13 @@ def get_situations(line_ids: list[str], language: str = "no") -> list[Situation]
     query = entur_query.create_situation_query(line_ids)
     json = entur_query.journey_planner_api(query).json()
 
-    situations: list[Situation] = []
     if not json.get("data"):
         # If there is no valid data, return an empty list
-        return situations
+        return []
 
+    situations: list[Situation] = []
     for line in json["data"]["lines"]:
-        if not line:
+        if not line or line["id"] not in line_ids:
             # Might be empty if line_id is non-existing
             continue
 

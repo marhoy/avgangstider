@@ -3,11 +3,9 @@
 from collections.abc import Callable
 from unittest import mock
 
-import avgangstider
-from avgangstider import entur_api
-from avgangstider.classes import Situation
+from freezegun import freeze_time
 
-from .conftest import FixedDateTime
+import avgangstider
 
 
 def test_get_departures() -> None:  # noqa: D103
@@ -25,7 +23,7 @@ def test_get_departures() -> None:  # noqa: D103
         assert departure.line_name == "3"
         assert departure.platform in ("NSR:Quay:10948", "NSR:Quay:10949")
 
-    # Test querying a specific line (from Helsfyr)
+    # Test querying a specific line (bus 21 from Helsfyr)
     departures = avgangstider.get_departures(
         "NSR:StopPlace:59516", max_departures=10, line_ids=["RUT:Line:21"]
     )
@@ -54,20 +52,22 @@ def test_get_situations() -> None:  # noqa: D103
     assert situations == []
 
 
+@freeze_time("2019-09-21T12:00:00+02:00")
 @mock.patch("avgangstider.entur_api.entur_query")
 def test_get_situations_mocked(  # noqa: D103
     entur_query: Callable[[str, int], str],
     saved_situations_json: dict[str, list[dict[str, str]]],
-    saved_situations_list: list[Situation],
-    fixed_datetime: type[FixedDateTime],
 ) -> None:
     # Fake datetime.now() and the situation-json
     entur_query.journey_planner_api().json.return_value = saved_situations_json  # type: ignore
-    entur_api.datetime = fixed_datetime("2019-09-21T12:00:00+02:00")  # type: ignore
 
-    # Compared returned situations with the saved result
-    situations = avgangstider.get_situations(
-        ["RUT:Line:11", "RUT:Line:11", "RUT:Line:35"]
-    )
-    assert situations == saved_situations_list
-    assert str(situations[0]) == str(saved_situations_list[0])
+    # Get mocked situations for two lines
+    situations = avgangstider.get_situations(["RUT:Line:35", "RUT:Line:11"])
+
+    assert len(situations) == 2
+
+    assert situations[0].line_name == "11"
+    assert situations[0].summary == "Innstilt mellom Jernbanetorget og Majorstuen"
+
+    assert situations[1].line_name == "35"
+    assert situations[1].summary == "Innstilt ut september"
