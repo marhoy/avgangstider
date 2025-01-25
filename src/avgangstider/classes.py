@@ -2,28 +2,38 @@
 
 from __future__ import annotations
 
+import datetime
 import functools
-from dataclasses import dataclass
-from datetime import datetime
+from typing import Annotated
+
+from pydantic import BaseModel, Field
+
+# Data types for Departure and Situation
+Color = Annotated[
+    str | None, Field(..., pattern="[0-9A-F]{6}", description="A color in hex format.")
+]
+LineID = Annotated[str, Field(..., pattern=r"\w+:\w+:\w+", description="A line ID.")]
+PlatformID = Annotated[
+    str, Field(..., pattern=r"NSR:Quay:\d+", description="A platform ID.")
+]
 
 
-@dataclass
-class Departure:
+class Departure(BaseModel):
     """A data class to hold information about a departure."""
 
-    line_id: str
+    line_id: LineID
     line_name: str
     destination: str
-    platform: str
-    departure_datetime: datetime
-    bg_color: str
-    fg_color: str
+    platform: PlatformID
+    departure_datetime: datetime.datetime
+    bg_color: Color
+    fg_color: Color
 
     @property
     def departure_string(self) -> str:
         """The departure time as a string relative to now()."""
         # How long is it to the departure?
-        now = datetime.now(tz=self.departure_datetime.tzinfo)
+        now = datetime.datetime.now(tz=self.departure_datetime.tzinfo)
         minutes = (self.departure_datetime - now).total_seconds() // 60
         if minutes <= 0:
             departure_string = "nå"
@@ -41,16 +51,15 @@ class Departure:
         )
 
 
-@dataclass
 @functools.total_ordering
-class Situation:
+class Situation(BaseModel):
     """A data class to hold information about a situation."""
 
-    line_id: str
+    line_id: LineID
     line_name: str
     transport_mode: str
-    bg_color: str
-    fg_color: str
+    bg_color: Color
+    fg_color: Color
     summary: str
 
     def __eq__(self, other: object) -> bool:
