@@ -7,7 +7,7 @@ ENV UV_NO_CACHE=true \
     UV_COMPILE_BYTECODE=true
 
 # Install uv
-COPY --from=ghcr.io/astral-sh/uv:0.5.21 /uv /uvx /bin/
+COPY --from=ghcr.io/astral-sh/uv:0.5.24 /uv /uvx /bin/
 
 # We want to run things as a non-privileged user
 ENV USERNAME=flask

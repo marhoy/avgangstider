@@ -1,7 +1,7 @@
 #!/bin/bash
 
 IMAGE_NAME=marhoy/avgangstider
-VERSION=$(uvx uvx --from=hatch hatch version)
+VERSION=$(uv run python -m setuptools_scm)
 LOCAL_PORT=8080
 
 echo -e "\n\nBuilding version $VERSION...\n\n"

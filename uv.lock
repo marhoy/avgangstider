@@ -56,10 +56,10 @@ dev = [
     { name = "pre-commit" },
     { name = "pytest-cov" },
     { name = "pytest-flask" },
+    { name = "setuptools-scm" },
     { name = "types-requests" },
 ]
 docs = [
-    { name = "setuptools-scm" },
     { name = "sphinx" },
     { name = "sphinx-rtd-theme" },
 ]
@@ -81,10 +81,10 @@ dev = [
     { name = "pre-commit", specifier = ">=4.1.0" },
     { name = "pytest-cov", specifier = ">=6.0.0" },
     { name = "pytest-flask", specifier = ">=1.3.0" },
+    { name = "setuptools-scm", specifier = ">=8.1.0" },
     { name = "types-requests", specifier = ">=2.32.0.20241016" },
 ]
 docs = [
-    { name = "setuptools-scm", specifier = ">=8.1.0" },
     { name = "sphinx", specifier = ">=8.1.3" },
     { name = "sphinx-rtd-theme", specifier = ">=3.0.2" },
 ]
