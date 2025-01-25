@@ -14,7 +14,7 @@ ENV USERNAME=flask
 ENV PATH="$PATH:/home/$USERNAME/.local/bin:/home/$USERNAME/app/.venv/bin"
 
 # Add user
-RUN useradd -m $USERNAMEAME && adduser -S $USERNAME -G $USERNAME
+RUN useradd -m $USERNAME
 
 # Set up a workdir
 WORKDIR /home/$USERNAME/app
