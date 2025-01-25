@@ -9,3 +9,4 @@ from avgangstider.flask_app import create_app
 __all__ = ["Departure", "Situation", "create_app", "get_departures", "get_situations"]
 
 __version__ = importlib.metadata.version("avgangstider")
+print(f"avgangstider version {__version__}")
