@@ -33,7 +33,7 @@ RUN uv sync --no-dev --no-install-project
 COPY . .
 
 # Install our own package
-RUN RUN --mount=source=.git,target=.git,type=bind uv sync --no-dev
+RUN --mount=source=.git,target=.git,type=bind uv sync --no-dev
 
 # Expose port 5000
 EXPOSE 5000
