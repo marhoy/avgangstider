@@ -3,6 +3,8 @@
 Welcome to Avgangstider's documentation!
 ########################################
 
+Version: |release|
+
 Table of contents
 =================
 .. toctree::

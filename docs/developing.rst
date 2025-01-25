@@ -2,31 +2,20 @@
 Developing
 ==========
 
-#.  Install `pyenv <https://github.com/pyenv/pyenv>`_ with some plugins,
-    especially `pyenv-virtualenv <https://github.com/pyenv/pyenv-virtualenv>`_
-    and `pyenv-which-ext <https://github.com/pyenv/pyenv-which-ext>`_.
-    These extensions will be installed automatically if you use the
-    `pyenv-installer <https://github.com/pyenv/pyenv-installer>`_
-#. Install Poetry
+#.  Install `uv <https://docs.astral.sh/uv/>`_.
 
 
 Setting up your development environment
 ---------------------------------------
  ::
 
-    # Install Python 3.9 and make a new virtual environment
-    pyenv install 3.9.7
-    pyenv virtualenv 3.9.7 avgangstider
 
     # Clone the repository
-    git clone git@github.com:marhoy/flask-entur-avgangstider.git
+    git clone https://github.com/marhoy/avgangstider.git
+    cd avgangstider
 
-    # Activate the virtual environment for this directory
-    cd flask-entur-avgangstider
-    pyenv local avgangstider 3.9.7
-
-    # Install all requirements (also for development)
-    poetry install
+    # Set up development environment
+    uv sync
 
 
 Start a debugging server
@@ -34,50 +23,23 @@ Start a debugging server
 
  ::
 
-    python src/avgangstider/flask_app.py
+    uv run python src/avgangstider/flask_app.py
 
 
 Run all tests and code checks
 -----------------------------
 
 After having made changes: Make sure all tests are still OK, test coverage
-is still 100% and that flake8, mypy and isort are all happy::
+is still 100% and that linters and formatters are happy::
 
-    tox
+    uv run pre-commit run --all-files
+    uv run pytest
 
-    [...]
-    src/avgangstider/utils.py .                                              [  6%]
-    tests/test_classes.py .                                                  [ 12%]
-    tests/test_entur_api.py ...                                              [ 31%]
-    tests/test_entur_query.py ...                                            [ 50%]
-    tests/test_flask_app.py .......                                          [ 93%]
-    tests/test_utils.py .                                                    [100%]
+Build documentation
+-------------------
 
-    ---------- coverage: platform darwin, python 3.7.4-final-0 -----------
-    Name    Stmts   Miss  Cover   Missing
-    -------------------------------------
-    -------------------------------------
-    TOTAL     197      0   100%
-
-    7 files skipped due to complete coverage.
-
-
-    ============================== 16 passed in 4.39s ==============================
-
-    [...]
-    lint run-test: commands[0] | poetry run flake8 src tests
-    lint run-test: commands[1] | poetry run isort --check-only src tests
-    lint run-test: commands[2] | poetry run mypy src
-
-    [...]
-    ___________________________________ summary ____________________________________
-    py37: commands succeeded
-    py38: commands succeeded
-    py39: commands succeeded
-    lint: commands succeeded
-    docs: commands succeeded
-    congratulations :)
-
+    uv sync --group docs
+    uv run make -C docs html
 
 Build new docker image
 ----------------------

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 IMAGE_NAME=marhoy/avgangstider
-VERSION=$(uvx --from=toml-cli toml get --toml-path=pyproject.toml project.version)
+VERSION=$(uvx uvx --from=hatch hatch version)
 LOCAL_PORT=8080
 
 echo -e "\n\nBuilding version $VERSION...\n\n"
