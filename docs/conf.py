@@ -1,6 +1,6 @@
 """Configuration file for Sphinx documentation builder."""
 
-import os
+import setuptools_scm
 
 #
 # This file only contains a selection of the most common options. For a full
@@ -25,7 +25,7 @@ copyright = "2019, Martin Høy"  # noqa: A001
 author = "Martin Høy"
 
 # The full version, including alpha/beta/rc tags
-release = os.popen("hatch version").read().strip()  # noqa: S605, S607
+release = setuptools_scm.get_version(root="..", relative_to=__file__)
 
 # -- General configuration ---------------------------------------------------
 
