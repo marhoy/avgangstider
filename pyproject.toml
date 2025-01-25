@@ -14,7 +14,7 @@ dependencies = [
 ]
 
 [dependency-groups]
-docs = ["sphinx>=8.1.3", "sphinx-rtd-theme>=3.0.2"]
+docs = ["hatch>=1.14.0", "sphinx>=8.1.3", "sphinx-rtd-theme>=3.0.2"]
 dev = [
     "ipykernel>=6.29.5",
     "pre-commit>=4.1.0",
@@ -34,10 +34,6 @@ build-backend = "hatchling.build"
 [tool.hatch.version]
 # Get version from git tags
 source = "vcs"
-
-[tool.hatch.build.hooks.vcs]
-# Write version to a static file for the documentation
-version-file = "docs/_version.py"
 
 [tool.ruff]
 # Consider packages in the src directory as first-party code
