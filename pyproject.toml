@@ -1,10 +1,11 @@
 [project]
 name = "avgangstider"
-version = "0.9.0"
 description = "Avgangstider fra EnTur"
 readme = "README.rst"
 authors = [{ name = "Martin Høy", email = "martin@hoy.priv.no" }]
 requires-python = ">=3.10"
+dynamic = ["version"]
+
 dependencies = [
     "flask>=3.1.0",
     "gunicorn>=23.0.0",
@@ -23,9 +24,16 @@ dev = [
 ]
 
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling", "hatch-vcs"]
 build-backend = "hatchling.build"
 
+[tool.uv]
+# Rebuild only when the git commit or tags change
+# cache-keys = [{ git = { commit = true, tags = true } }]
+
+[tool.hatch.version]
+# Get version from git tags
+source = "vcs"
 
 [tool.ruff]
 # Consider packages in the src directory as first-party code
