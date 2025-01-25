@@ -1,6 +1,6 @@
 """Configuration file for Sphinx documentation builder."""
 
-from avgangstider import __version__
+from _version import __version__
 
 #
 # This file only contains a selection of the most common options. For a full
