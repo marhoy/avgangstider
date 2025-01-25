@@ -1,6 +1,6 @@
 """Configuration file for Sphinx documentation builder."""
 
-from _version import __version__
+import os
 
 #
 # This file only contains a selection of the most common options. For a full
@@ -25,8 +25,7 @@ copyright = "2019, Martin Høy"  # noqa: A001
 author = "Martin Høy"
 
 # The full version, including alpha/beta/rc tags
-release = __version__
-
+release = os.popen("hatch version").read().strip()  # noqa: S605, S607
 
 # -- General configuration ---------------------------------------------------
 
