@@ -1,11 +1,10 @@
 """Get departures and situations from the Entur API."""
 
-from datetime import datetime
+import datetime
 
 from loguru import logger
 
-from avgangstider import Departure, Situation, entur_query, utils
-from avgangstider.utils import iso_str_to_datetime
+from avgangstider import Departure, Situation, entur_query
 
 
 def get_departures(
@@ -52,7 +51,9 @@ def get_departures(
         fg_color = journey["serviceJourney"]["line"]["presentation"]["textColour"]
         platform = journey["quay"]["id"]
         destination = journey["destinationDisplay"]["frontText"]
-        departure_datetime = iso_str_to_datetime(journey["expectedDepartureTime"])
+        departure_datetime = datetime.datetime.fromisoformat(
+            journey["expectedDepartureTime"]
+        )
 
         # Skip unwanted platforms
         if platforms and (platform not in platforms):
@@ -111,9 +112,9 @@ def get_situations(line_ids: list[str], language: str = "no") -> list[Situation]
             end_time = situation["validityPeriod"]["endTime"]
 
             # Find start, end and current timestamp
-            start_time = utils.iso_str_to_datetime(start_time)
-            end_time = utils.iso_str_to_datetime(end_time)
-            now = datetime.now(tz=start_time.tzinfo)
+            start_time = datetime.datetime.fromisoformat(start_time)
+            end_time = datetime.datetime.fromisoformat(end_time)
+            now = datetime.datetime.now(tz=start_time.tzinfo)
 
             # Add relevant situations to the list
             if start_time < now < end_time:
