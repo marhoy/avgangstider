@@ -1,8 +1,6 @@
 """Tests for the entur_api module."""
 
-from collections.abc import Callable
-from unittest import mock
-
+import requests_mock
 from freezegun import freeze_time
 
 import avgangstider
@@ -42,6 +40,27 @@ def test_get_departures() -> None:  # noqa: D103
         assert "3  -> Mortensrud" in str(departure)
 
 
+@freeze_time("2025-01-26T18:00:00+01:00")
+def test_get_situations_mocked_1(mocked_situations: requests_mock.Mocker) -> None:  # noqa: ARG001
+    """Test get_situations with mocked data."""
+    situations = avgangstider.get_situations(line_ids=[])
+
+    assert len(situations) == 2
+    assert (
+        situations[0].summary
+        == "T-banen stopper ikke på Nationaltheatret i vestgående retning"
+    )
+
+
+@freeze_time("2025-01-27T22:00:00+01:00")
+def test_get_situations_mocked_2(mocked_situations: requests_mock.Mocker) -> None:  # noqa: ARG001
+    """Test get_situations with mocked data."""
+    situations = avgangstider.get_situations(line_ids=[])
+
+    assert len(situations) == 2
+    assert situations[0].summary == "Linje 2: Endret kjøremønster på kveldstid"
+
+
 def test_get_situations() -> None:  # noqa: D103
     # Test without specifying line_ids
     situations = avgangstider.get_situations(line_ids=[])
@@ -50,24 +69,3 @@ def test_get_situations() -> None:  # noqa: D103
     # Test with an invalid line number
     situations = avgangstider.get_situations(line_ids=["RUT:Line:0"])
     assert situations == []
-
-
-@freeze_time("2019-09-21T12:00:00+02:00")
-@mock.patch("avgangstider.entur_api.entur_query")
-def test_get_situations_mocked(  # noqa: D103
-    entur_query: Callable[[str, int], str],
-    saved_situations_json: dict[str, list[dict[str, str]]],
-) -> None:
-    # Fake datetime.now() and the situation-json
-    entur_query.journey_planner_api().json.return_value = saved_situations_json  # type: ignore
-
-    # Get mocked situations for two lines
-    situations = avgangstider.get_situations(["RUT:Line:35", "RUT:Line:11"])
-
-    assert len(situations) == 2
-
-    assert situations[0].line_name == "11"
-    assert situations[0].summary == "Innstilt mellom Jernbanetorget og Majorstuen"
-
-    assert situations[1].line_name == "35"
-    assert situations[1].summary == "Innstilt ut september"

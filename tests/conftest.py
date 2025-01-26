@@ -3,31 +3,23 @@
 from __future__ import annotations
 
 import json
-import logging
-import pickle
 from pathlib import Path
-from typing import Any
 
 import pytest
+import requests_mock
 from flask import Flask
-from pydantic import Json
 
 import avgangstider
-from avgangstider.classes import Situation
-
-LOG = logging.getLogger(__name__)
+from avgangstider.constants import API_URL
 
 
 @pytest.fixture
-def saved_situations_json() -> Json[Any]:  # noqa: D103
-    with Path(Path(__file__).parent / "data" / "situations.json").open() as file:
-        return json.load(file)
-
-
-@pytest.fixture
-def saved_situations_list() -> list[Situation]:  # noqa: D103
-    with Path(Path(__file__).parent / "data" / "situations.pkl").open("rb") as file:
-        return pickle.load(file)  # noqa: S301
+def mocked_situations(requests_mock: requests_mock.Mocker) -> requests_mock.Mocker:
+    """Mock the Entur Journey Planner API with the contents of situations.json."""
+    file = Path(__file__).parent / "saved_responses" / "situations.json"
+    data = json.loads(file.read_text())
+    requests_mock.post(API_URL, json=data)
+    return requests_mock
 
 
 @pytest.fixture

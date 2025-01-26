@@ -2,6 +2,8 @@
 
 import requests
 
+from avgangstider.constants import API_URL
+
 # For testing and debugging of queries, use this page:
 # https://api.entur.org/doc/shamash-journeyplanner/
 
@@ -156,7 +158,7 @@ def journey_planner_api(query: str) -> requests.Response:
     import socket
 
     client_name = f"flask-entur-avgangstider-{socket.gethostname()}"
-    query_url = r"https://api.entur.io/journey-planner/v3/graphql"
+    query_url = API_URL
     headers = {"ET-Client-Name": client_name}
     response = requests.post(
         query_url, headers=headers, json={"query": query}, timeout=5
