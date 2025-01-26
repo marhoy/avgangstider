@@ -1,4 +1,4 @@
-"""Define the nox sessions."""
+"""Define nox sessions."""
 
 import nox
 
