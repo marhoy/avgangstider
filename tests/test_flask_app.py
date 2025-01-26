@@ -1,11 +1,7 @@
 """Tests for the Flask app."""
 
-from collections.abc import Callable
-from unittest import mock
-
+import requests_mock
 from flask.testing import FlaskClient
-
-from avgangstider.classes import Situation
 
 
 def test_static(client: FlaskClient) -> None:  # noqa: D103
@@ -76,19 +72,18 @@ def test_deviations_with_line(client: FlaskClient) -> None:  # noqa: D103
     assert response.status_code == 200
 
 
-@mock.patch("avgangstider.get_situations")
-def test_deviations_mocked(  # noqa: D103
-    mocked_func: Callable[[list[str], str], list[Situation]],
+def test_deviations_mocked(
     client: FlaskClient,
-    saved_situations_list: list[Situation],
+    mocked_situations: requests_mock.Mocker,  # noqa: ARG001
 ) -> None:
-    # Load some mocked situations
-    mocked_func.return_value = saved_situations_list  # type: ignore
-
+    """Test deviations endpoint with mocked data."""
     client.get("/departure_table", query_string={"stop_id": "NSR:StopPlace:58366"})
 
     response = client.get(
         "/deviations", query_string={"stop_id": "NSR:StopPlace:58366"}
     )
     assert response.status_code == 200
-    assert b"11: Innstilt mellom Jernbanetorget og Majorstuen" in response.data
+    assert (
+        response.data.decode("utf-8")
+        == "2: T-banen stopper ikke på Nationaltheatret i vestgående retning"
+    )

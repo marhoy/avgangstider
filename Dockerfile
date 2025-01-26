@@ -33,7 +33,7 @@ COPY --chown=${USERNAME}:${USERNAME} . .
 # Install our own package: Since we're using dynamic versioning and we don't have access
 # to the git repo, we need to set the version manually via a build arg.
 ARG VERSION
-RUN SETUPTOOLS_SCM_PRETEND_VERSION=${VERSION} uv sync --no-dev
+RUN SETUPTOOLS_SCM_PRETEND_VERSION_FOR_AVGANGSTIDER=${VERSION} uv sync --no-dev
 
 # Expose port 5000
 EXPOSE 5000

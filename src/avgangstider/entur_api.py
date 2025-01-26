@@ -94,7 +94,7 @@ def get_situations(line_ids: list[str], language: str = "no") -> list[Situation]
 
     situations: list[Situation] = []
     for line in json["data"]["lines"]:
-        if not line or line["id"] not in line_ids:
+        if not line:
             # Might be empty if line_id is non-existing
             continue
 
