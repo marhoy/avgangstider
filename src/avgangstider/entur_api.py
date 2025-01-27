@@ -24,24 +24,21 @@ def get_departures(
     Returns:
         A list of departures
     """
-    if not isinstance(stop_id, str):
-        raise ValueError("stop_id must be a string")
+    if line_ids is None:
+        line_ids = []
 
     # Get response from Entur API
-    if line_ids:
-        json = entur_query.departure_line_query_data(
-            stop_id=stop_id, line_ids=line_ids, max_departures=max_departures
-        )
-    else:
-        json = entur_query.departure_query_data(
-            stop_id=stop_id, max_departures=max_departures
-        )
+    json = entur_query.departure_line_query_data(
+        stop_id=stop_id, line_ids=line_ids, max_departures=max_departures
+    )
+
+    # Return an empty list if there is no valid data
+    try:
+        json["data"]["stopPlace"]["estimatedCalls"]
+    except (TypeError, KeyError):
+        return []
 
     departures: list[Departure] = []
-    if json["data"]["stopPlace"] is None:
-        # If there is no valid data, return an empty list
-        return departures
-
     for journey in json["data"]["stopPlace"]["estimatedCalls"]:
         # Extract the elements we want from the response
         line_id = journey["serviceJourney"]["line"]["id"]
@@ -87,8 +84,10 @@ def get_situations(line_ids: list[str], language: str = "no") -> list[Situation]
 
     json = entur_query.situation_query_data(line_ids)
 
-    if not json.get("data"):
-        # If there is no valid data, return an empty list
+    # Return an empty list if there is no valid data
+    try:
+        json["data"]["lines"]
+    except (TypeError, KeyError):
         return []
 
     situations: list[Situation] = []

@@ -7,7 +7,7 @@ import avgangstider
 
 
 def test_get_departures() -> None:  # noqa: D103
-    # Test with an empty string as stop_id_
+    # Test with an empty string as stop_id:
     departures = avgangstider.get_departures(stop_id="")
     assert departures == []
 

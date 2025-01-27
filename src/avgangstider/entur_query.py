@@ -10,54 +10,6 @@ from avgangstider.constants import API_URL
 # https://api.entur.io/graphql-explorer/journey-planner-v3
 
 
-def departure_query_data(stop_id: str, max_departures: int = 10) -> dict[str, Any]:
-    """Get GraphQL query data: Finding departures for a specific stop_id.
-
-    Args:
-        stop_id: The stop_id you want departures for
-        max_departures: The maximum number of departures to ask for
-
-    Returns:
-        A GraphQL query string
-    """
-    query = """
-query Departures($id: String!, $max_departures: Int) {
-  stopPlace(
-    id: $id
-  ) {
-    name
-    estimatedCalls(
-      numberOfDepartures: $max_departures
-    ) {
-      quay {
-        id
-        description
-      }
-      expectedDepartureTime
-      actualDepartureTime
-      realtime
-      realtimeState
-      destinationDisplay {
-        frontText
-      }
-      serviceJourney {
-        line {
-          id
-          publicCode
-          presentation {
-            colour
-            textColour
-          }
-        }
-      }
-    }
-  }
-}
-"""
-    variables = {"id": stop_id, "max_departures": max_departures}
-    return journey_planner_api(query, variables).json()
-
-
 def departure_line_query_data(
     stop_id: str, line_ids: list[str], max_departures: int = 10
 ) -> dict[str, Any]:
@@ -67,7 +19,7 @@ def departure_line_query_data(
 
     Args:
         stop_id: The stop_id you want departures for
-        line_ids: A list of the lines you want departures for
+        line_ids: A list of the lines you want departures for, can be empty
         max_departures: The maximum number of departures to ask for
 
     Returns:
