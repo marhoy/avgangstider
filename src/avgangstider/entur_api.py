@@ -29,14 +29,13 @@ def get_departures(
 
     # Get response from Entur API
     if line_ids:
-        query = entur_query.create_departure_query_whitelist(
+        json = entur_query.departure_line_query_data(
             stop_id=stop_id, line_ids=line_ids, max_departures=max_departures
         )
     else:
-        query = entur_query.create_departure_query(
+        json = entur_query.departure_query_data(
             stop_id=stop_id, max_departures=max_departures
         )
-    json = entur_query.journey_planner_api(query).json()
 
     departures: list[Departure] = []
     if json["data"]["stopPlace"] is None:
@@ -59,7 +58,7 @@ def get_departures(
         if platforms and (platform not in platforms):
             continue
 
-        # Format departure string and add a departure to the list
+        # Add departure to the list
         departure = Departure(
             line_id=line_id,
             line_name=line_name,
@@ -86,8 +85,7 @@ def get_situations(line_ids: list[str], language: str = "no") -> list[Situation]
     """
     logger.debug(f"Getting situations for lines {line_ids}.")
 
-    query = entur_query.create_situation_query(line_ids)
-    json = entur_query.journey_planner_api(query).json()
+    json = entur_query.situation_query_data(line_ids)
 
     if not json.get("data"):
         # If there is no valid data, return an empty list
