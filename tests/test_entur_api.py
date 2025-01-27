@@ -11,6 +11,10 @@ def test_get_departures() -> None:  # noqa: D103
     departures = avgangstider.get_departures(stop_id="")
     assert departures == []
 
+    # Test with an invalid stop_id:
+    departures = avgangstider.get_departures(stop_id="InvalidStopId")
+    assert departures == []
+
     # Test without specifying line_ids
     # At Godlia T, the only passing line is 3, and there is only two quays
     departures = avgangstider.get_departures(
