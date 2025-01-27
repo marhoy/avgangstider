@@ -1,11 +1,10 @@
 """Get departures and situations from the Entur API."""
 
-from datetime import datetime
+import datetime
 
 from loguru import logger
 
-from avgangstider import Departure, Situation, entur_query, utils
-from avgangstider.utils import iso_str_to_datetime
+from avgangstider import Departure, Situation, entur_query
 
 
 def get_departures(
@@ -25,25 +24,21 @@ def get_departures(
     Returns:
         A list of departures
     """
-    if not isinstance(stop_id, str):
-        raise ValueError("stop_id must be a string")
+    if line_ids is None:
+        line_ids = []
 
     # Get response from Entur API
-    if line_ids:
-        query = entur_query.create_departure_query_whitelist(
-            stop_id=stop_id, line_ids=line_ids, max_departures=max_departures
-        )
-    else:
-        query = entur_query.create_departure_query(
-            stop_id=stop_id, max_departures=max_departures
-        )
-    json = entur_query.journey_planner_api(query).json()
+    json = entur_query.departure_line_query_data(
+        stop_id=stop_id, line_ids=line_ids, max_departures=max_departures
+    )
+
+    # Return an empty list if there is no valid data
+    try:
+        json["data"]["stopPlace"]["estimatedCalls"]
+    except (TypeError, KeyError):
+        return []
 
     departures: list[Departure] = []
-    if json["data"]["stopPlace"] is None:
-        # If there is no valid data, return an empty list
-        return departures
-
     for journey in json["data"]["stopPlace"]["estimatedCalls"]:
         # Extract the elements we want from the response
         line_id = journey["serviceJourney"]["line"]["id"]
@@ -52,13 +47,15 @@ def get_departures(
         fg_color = journey["serviceJourney"]["line"]["presentation"]["textColour"]
         platform = journey["quay"]["id"]
         destination = journey["destinationDisplay"]["frontText"]
-        departure_datetime = iso_str_to_datetime(journey["expectedDepartureTime"])
+        departure_datetime = datetime.datetime.fromisoformat(
+            journey["expectedDepartureTime"]
+        )
 
         # Skip unwanted platforms
         if platforms and (platform not in platforms):
             continue
 
-        # Format departure string and add a departure to the list
+        # Add departure to the list
         departure = Departure(
             line_id=line_id,
             line_name=line_name,
@@ -85,11 +82,12 @@ def get_situations(line_ids: list[str], language: str = "no") -> list[Situation]
     """
     logger.debug(f"Getting situations for lines {line_ids}.")
 
-    query = entur_query.create_situation_query(line_ids)
-    json = entur_query.journey_planner_api(query).json()
+    json = entur_query.situation_query_data(line_ids)
 
-    if not json.get("data"):
-        # If there is no valid data, return an empty list
+    # Return an empty list if there is no valid data
+    try:
+        json["data"]["lines"]
+    except (TypeError, KeyError):
         return []
 
     situations: list[Situation] = []
@@ -111,9 +109,9 @@ def get_situations(line_ids: list[str], language: str = "no") -> list[Situation]
             end_time = situation["validityPeriod"]["endTime"]
 
             # Find start, end and current timestamp
-            start_time = utils.iso_str_to_datetime(start_time)
-            end_time = utils.iso_str_to_datetime(end_time)
-            now = datetime.now(tz=start_time.tzinfo)
+            start_time = datetime.datetime.fromisoformat(start_time)
+            end_time = datetime.datetime.fromisoformat(end_time)
+            now = datetime.datetime.now(tz=start_time.tzinfo)
 
             # Add relevant situations to the list
             if start_time < now < end_time:

@@ -2,6 +2,7 @@
 
 import requests_mock
 from flask.testing import FlaskClient
+from freezegun import freeze_time
 
 
 def test_static(client: FlaskClient) -> None:  # noqa: D103
@@ -72,6 +73,7 @@ def test_deviations_with_line(client: FlaskClient) -> None:  # noqa: D103
     assert response.status_code == 200
 
 
+@freeze_time("2025-01-26T18:00:00+01:00")
 def test_deviations_mocked(
     client: FlaskClient,
     mocked_situations: requests_mock.Mocker,  # noqa: ARG001

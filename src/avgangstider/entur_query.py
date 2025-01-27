@@ -1,111 +1,71 @@
 """Query the Entur Journey Planner API for departures and situations."""
 
+from typing import Any
+
 import requests
 
 from avgangstider.constants import API_URL
 
 # For testing and debugging of queries, use this page:
-# https://api.entur.org/doc/shamash-journeyplanner/
+# https://api.entur.io/graphql-explorer/journey-planner-v3
 
 
-def create_departure_query(stop_id: str, max_departures: int = 10) -> str:
-    """Create a GraphQL query, finding departures for a specific stop_id.
-
-    Args:
-        stop_id: The stop_id you want departures for
-        max_departures: The maximum number of departures to ask for
-
-    Returns:
-        A GraphQL query string
-    """
-    return """
-    {
-      stopPlace(id: "STOP_PLACE" ) {
-        name
-        estimatedCalls(numberOfDepartures: MAX_DEPARTURES ) {
-          quay {
-            id
-            description
-          }
-          expectedDepartureTime
-          actualDepartureTime
-          realtime
-          realtimeState
-          destinationDisplay {
-            frontText
-          }
-          serviceJourney {
-            line {
-              id
-              publicCode
-              presentation {
-                colour
-                textColour
-              }
-            }
-          }
-        }
-      }
-    }
-    """.replace("STOP_PLACE", stop_id).replace("MAX_DEPARTURES", str(max_departures))
-
-
-def create_departure_query_whitelist(
+def departure_line_query_data(
     stop_id: str, line_ids: list[str], max_departures: int = 10
-) -> str:
-    """Create a GraphQL query.
+) -> dict[str, Any]:
+    """Get GraphQL query data.
 
     Finding departures for a specific stop_id, and for specific line_ids.
 
     Args:
         stop_id: The stop_id you want departures for
-        line_ids: A list of the lines you want departures for
+        line_ids: A list of the lines you want departures for, can be empty
         max_departures: The maximum number of departures to ask for
 
     Returns:
         A GraphQL query string
     """
-    return (
-        """
-    {
-      stopPlace(id: "STOP_PLACE") {
-        name
-            estimatedCalls(
-          numberOfDepartures: MAX_DEPARTURES
-          whiteListed: {
-                lines: LIST_OF_LINE_IDS
-            }
-        ) {
-          expectedArrivalTime
-          expectedDepartureTime
-          quay {
-            id
-            description
-          }
-          destinationDisplay {
-            frontText
-          }
-                serviceJourney {
-            line {
-              id
-              publicCode
-              presentation {
-                colour
-                textColour
-              }
-                    }
+    query = """
+query Departures($id: String!, $line_ids: [ID], $max_departures: Int) {
+  stopPlace(
+    id: $id
+  ) {
+    name
+    estimatedCalls(
+      numberOfDepartures: $max_departures,
+      whiteListed: {
+        lines: $line_ids
+      }
+    ) {
+      expectedArrivalTime
+      expectedDepartureTime
+      quay {
+        id
+        description
+      }
+      destinationDisplay {
+        frontText
+      }
+      serviceJourney {
+        line {
+          id
+          publicCode
+          presentation {
+            colour
+            textColour
           }
         }
       }
     }
-    """.replace("STOP_PLACE", stop_id)
-        .replace("MAX_DEPARTURES", str(max_departures))
-        .replace("LIST_OF_LINE_IDS", str(line_ids).replace("'", '"'))
-    )
+  }
+}
+"""
+    variables = {"id": stop_id, "line_ids": line_ids, "max_departures": max_departures}
+    return journey_planner_api(query, variables).json()
 
 
-def create_situation_query(line_ids: list[str]) -> str:
-    """Create a GraphQL query, finding situations for a list of line_ids.
+def situation_query_data(line_ids: list[str]) -> dict[str, Any]:
+    """Get GraphQL query data: Situations for a list of line_ids.
 
     Args:
         line_ids: A list of line_ids you want situations for
@@ -113,55 +73,61 @@ def create_situation_query(line_ids: list[str]) -> str:
     Returns:
         A GraphQL query string
     """
-    return """
-    {
-      lines(ids: LIST_OF_LINE_IDS) {
-        id
-        publicCode
-        transportMode
-        presentation {
-          textColour
-          colour
-        }
-        situations {
-          summary {
-            value
-            language
-          }
-          description {
-            value
-            language
-          }
-          advice {
-            value
-            language
-          }
-          validityPeriod {
-            startTime
-            endTime
-          }
-        }
+    query = """
+query Situations($line_ids: [ID]) {
+  lines(
+    ids: $line_ids
+  ) {
+    id
+    publicCode
+    transportMode
+    presentation {
+      textColour
+      colour
+    }
+    situations {
+      summary {
+        value
+        language
+      }
+      description {
+        value
+        language
+      }
+      advice {
+        value
+        language
+      }
+      validityPeriod {
+        startTime
+        endTime
       }
     }
-    """.replace("LIST_OF_LINE_IDS", str(line_ids).replace("'", '"'))
+  }
+}
+"""
+    variables = {"line_ids": line_ids}
+    return journey_planner_api(query, variables).json()
 
 
-def journey_planner_api(query: str) -> requests.Response:
+def journey_planner_api(query: str, variables: dict[str, Any]) -> requests.Response:
     """Query the Entur Journey Planner API.
 
     Args:
         query: A string with the GraphQL query
+        variables: A dictionary with the variables for the query
 
     Returns:
         A requests response object
     """
     import socket
 
-    client_name = f"flask-entur-avgangstider-{socket.gethostname()}"
-    query_url = API_URL
-    headers = {"ET-Client-Name": client_name}
+    headers = {"ET-Client-Name": f"avgangstider-{socket.gethostname()}"}
     response = requests.post(
-        query_url, headers=headers, json={"query": query}, timeout=5
+        API_URL,
+        headers=headers,
+        json={"query": query, "variables": variables},
+        timeout=5,
     )
     response.raise_for_status()
 
