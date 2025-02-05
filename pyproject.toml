@@ -2,6 +2,7 @@
 name = "avgangstider"
 description = "Avgangstider fra EnTur"
 readme = "README.rst"
+license-files = ["LICENSE"]
 authors = [{ name = "Martin Høy", email = "martin@hoy.priv.no" }]
 requires-python = ">=3.10"
 dynamic = ["version"]
@@ -29,12 +30,19 @@ dev = [
 ]
 
 [build-system]
-requires = ["setuptools>=64", "setuptools_scm>=8"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling", "versioningit"]
+build-backend = "hatchling.build"
+#requires = ["setuptools>=64", "setuptools_scm>=8"]
+#build-backend = "setuptools.build_meta"
 # requires = ["hatchling", "hatch-vcs"]
 # build-backend = "hatchling.build"
 
-[tool.setuptools_scm]
+[tool.hatch.version]
+source = "versioningit"
+
+[tool.versioningit]
+
+#[tool.setuptools_scm]
 # Use the git tags to determine the version
 
 [tool.uv]
