@@ -2,7 +2,7 @@
 name = "avgangstider"
 description = "Avgangstider fra EnTur"
 readme = "README.rst"
-license-files = ["LICENSE"]
+# license-files = ["LICENSE"]
 authors = [{ name = "Martin Høy", email = "martin@hoy.priv.no" }]
 requires-python = ">=3.10"
 dynamic = ["version"]
@@ -30,19 +30,10 @@ dev = [
 ]
 
 [build-system]
-requires = ["hatchling", "versioningit"]
-build-backend = "hatchling.build"
-#requires = ["setuptools>=64", "setuptools_scm>=8"]
-#build-backend = "setuptools.build_meta"
-# requires = ["hatchling", "hatch-vcs"]
-# build-backend = "hatchling.build"
+requires = ["setuptools>=64", "setuptools_scm>=8"]
+build-backend = "setuptools.build_meta"
 
-[tool.hatch.version]
-source = "versioningit"
-
-[tool.versioningit]
-
-#[tool.setuptools_scm]
+[tool.setuptools_scm]
 # Use the git tags to determine the version
 
 [tool.uv]
@@ -51,6 +42,13 @@ cache-keys = [
     { file = "pyproject.toml" },
     { git = { commit = true, tags = true } },
 ]
+
+[[tool.uv.index]]
+# For uploading to TestPyPI
+name = "testpypi"
+url = "https://test.pypi.org/simple/"
+publish-url = "https://test.pypi.org/legacy/"
+explicit = true
 
 
 [tool.ruff]
