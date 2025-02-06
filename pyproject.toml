@@ -2,7 +2,6 @@
 name = "avgangstider"
 description = "Avgangstider fra EnTur"
 readme = "README.rst"
-# license-files = ["LICENSE"]
 authors = [{ name = "Martin Høy", email = "martin@hoy.priv.no" }]
 requires-python = ">=3.10"
 dynamic = ["version"]
@@ -32,6 +31,10 @@ dev = [
 [build-system]
 requires = ["setuptools>=64", "setuptools_scm>=8"]
 build-backend = "setuptools.build_meta"
+
+# FIXME: temporary workaround until https://github.com/pypa/setuptools/issues/4759 is fixed
+[tool.setuptools]
+license-files = []
 
 [tool.setuptools_scm]
 # Use the git tags to determine the version
