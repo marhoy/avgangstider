@@ -31,8 +31,10 @@ dev = [
 [build-system]
 requires = ["setuptools>=64", "setuptools_scm>=8"]
 build-backend = "setuptools.build_meta"
-# requires = ["hatchling", "hatch-vcs"]
-# build-backend = "hatchling.build"
+
+# FIXME: temporary workaround until https://github.com/pypa/setuptools/issues/4759 is fixed
+[tool.setuptools]
+license-files = []
 
 [tool.setuptools_scm]
 # Use the git tags to determine the version
@@ -43,6 +45,13 @@ cache-keys = [
     { file = "pyproject.toml" },
     { git = { commit = true, tags = true } },
 ]
+
+[[tool.uv.index]]
+# For uploading to TestPyPI
+name = "testpypi"
+url = "https://test.pypi.org/simple/"
+publish-url = "https://test.pypi.org/legacy/"
+explicit = true
 
 
 [tool.ruff]
