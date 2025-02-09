@@ -20,7 +20,7 @@ jobs:
           python-version: "3.13"
 
       - name: Build the package
-        run: uv run build
+        run: uv build
 
       - name: Publish the package
-        run: uv run publish
+        run: uv publish
