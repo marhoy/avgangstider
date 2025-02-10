@@ -1,13 +1,13 @@
-name: Docker Publish
+name: Build and Publish to Docker Hub
 
 on:
   push:
-    # When a new version tag is pushed
     tags:
       - "v*"
 
 jobs:
   docker:
+    name: Publish
     runs-on: ubuntu-latest
     steps:
       - name: Docker meta
@@ -32,7 +32,7 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
+          push: true
           tags: ${{ steps.meta.outputs.tags }}
           platforms: linux/amd64,linux/arm64
-          push: false
           build-args: VERSION=${{ env.DOCKER_METADATA_OUTPUT_VERSION }}
