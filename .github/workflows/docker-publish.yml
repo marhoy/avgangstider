@@ -20,6 +20,11 @@ jobs:
           images: marhoy/avgangstider
           tags: type=semver,pattern={{major}}.{{minor}}.{{patch}}
 
+      - name: Install uv and set the python version
+        uses: astral-sh/setup-uv@v5
+        with:
+          version: "0.5.29"
+
       - name: Get version from setuptools_scm
         id: version-getter
         run: echo "VERSION=$(uv run --with setuptools_scm -m setuptools_scm)" >> "$GITHUB_OUTPUT"
