@@ -18,7 +18,11 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: marhoy/avgangstider
-          tags: type=semver,pattern={{major}}.{{minor}}
+          tags: type=semver,pattern={{major}}.{{minor}}.{{patch}}
+
+      - name: Get version from setuptools_scm
+        id: version-getter
+        run: echo "VERSION=$(uv run --with setuptools_scm -m setuptools_scm)" >> "$GITHUB_OUTPUT"
 
       - name: Login to Docker Hub
         uses: docker/login-action@v3
@@ -40,4 +44,4 @@ jobs:
           push: false
           tags: ${{ steps.meta.outputs.tags }}
           build-args: |
-            VERSION=$(uv run --with setuptools_scm -m setuptools_scm)
+            VERSION=${{ steps.version-getter.outputs.VERSION }}
