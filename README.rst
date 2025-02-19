@@ -2,7 +2,7 @@
 .. image:: https://github.com/marhoy/flask-entur-avgangstider/actions/workflows/main.yml/badge.svg
 .. image:: https://github.com/marhoy/flask-entur-avgangstider/actions/workflows/python-publish.yml/badge.svg
 .. image:: https://github.com/marhoy/flask-entur-avgangstider/actions/workflows/docker-publish.yml/badge.svg
-
+.. image:: https://readthedocs.org/projects/avgangstider/badge/
 
 About
 =====
